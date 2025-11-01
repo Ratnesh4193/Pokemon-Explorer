@@ -8,7 +8,7 @@ interface LoadMoreButtonProps {
 export const LoadMoreButton = ({ onLoadMore, isLoading, hasMore, showNoMore }: LoadMoreButtonProps) => {
   if (!hasMore && showNoMore) {
     return (
-      <div className="text-center text-gray-600">
+      <div className="text-center text-gray-600 dark:text-gray-400">
         <p>No more Pokémon to load</p>
       </div>
     )
