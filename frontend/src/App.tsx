@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
 import { usePokemon } from './hooks/usePokemon'
 import { usePokemonDetail } from './hooks/usePokemonDetail'
-import { filterPokemonByName } from './utils/pokemon.utils'
+import { filterPokemonByName, filterPokemonByTypes } from './utils/pokemon.utils'
 import { SearchBar } from './components/SearchBar'
+import { FilterBar } from './components/FilterBar'
 import { PokemonList } from './components/PokemonList'
 import { PokemonDetail } from './components/PokemonDetail'
 import { LoadMoreButton } from './components/LoadMoreButton'
@@ -10,6 +11,7 @@ import { ThemeToggle } from './components/ThemeToggle'
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const { pokemonList, loading, loadingMore, error, hasMore, loadMore, refetch } = usePokemon()
   const {
     selectedPokemon,
@@ -20,11 +22,26 @@ function App() {
     clearSelection,
   } = usePokemonDetail()
 
-  // Filter Pokémon based on search query
-  const filteredPokemon = useMemo(
-    () => filterPokemonByName(pokemonList, searchQuery),
-    [pokemonList, searchQuery]
-  )
+  // Filter Pokémon based on search query and selected types
+  const filteredPokemon = useMemo(() => {
+    let filtered = pokemonList
+    // Apply type filters first
+    filtered = filterPokemonByTypes(filtered, selectedTypes)
+    // Then apply search filter
+    filtered = filterPokemonByName(filtered, searchQuery)
+    return filtered
+  }, [pokemonList, searchQuery, selectedTypes])
+
+  const handleTypeToggle = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    )
+  }
+
+  const handleClearFilters = () => {
+    setSelectedTypes([])
+    setSearchQuery('')
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8 transition-colors duration-200">
@@ -38,19 +55,29 @@ function App() {
       )}
 
       {!selectedPokemon && (
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          resultCount={filteredPokemon.length}
-          totalCount={pokemonList.length}
-        />
+        <>
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            resultCount={filteredPokemon.length}
+            totalCount={pokemonList.length}
+          />
+          {pokemonList.length > 0 && (
+            <FilterBar
+              pokemonList={pokemonList}
+              selectedTypes={selectedTypes}
+              onTypeToggle={handleTypeToggle}
+              onClearFilters={handleClearFilters}
+            />
+          )}
+        </>
       )}
 
       {!selectedPokemon && (
         <>
           {filteredPokemon.length > 0 && (
             <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
-              {searchQuery
+              {searchQuery || selectedTypes.length > 0
                 ? `Found ${filteredPokemon.length} Pokémon`
                 : `Found ${pokemonList.length} Pokémon`}
             </h2>
@@ -63,7 +90,7 @@ function App() {
             onPokemonClick={fetchPokemonDetail}
           />
 
-          {!searchQuery && (
+          {!searchQuery && selectedTypes.length === 0 && (
             <LoadMoreButton
               onLoadMore={loadMore}
               isLoading={loadingMore}
@@ -74,7 +101,19 @@ function App() {
 
           {!loading && filteredPokemon.length === 0 && pokemonList.length > 0 && (
             <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">No Pokémon found matching "{searchQuery}"</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {searchQuery || selectedTypes.length > 0
+                  ? `No Pokémon found matching your filters${searchQuery ? ` "${searchQuery}"` : ''}${selectedTypes.length > 0 ? ` and type${selectedTypes.length > 1 ? 's' : ''}: ${selectedTypes.join(', ')}` : ''}`
+                  : 'No Pokémon found'}
+              </p>
+              {(searchQuery || selectedTypes.length > 0) && (
+                <button
+                  onClick={handleClearFilters}
+                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 font-medium"
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           )}
         </>

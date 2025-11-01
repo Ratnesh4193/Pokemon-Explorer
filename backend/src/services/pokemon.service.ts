@@ -19,12 +19,13 @@ class PokemonService {
     const pokemonList: PokeApiPokemon[] = response.data.results;
     const hasMore = response.data.next !== null;
 
-    // Fetch detailed info for each Pokémon to get images
+    // Fetch detailed info for each Pokémon to get images and types
     const pokemonPromises = pokemonList.map(async (pokemon: PokeApiPokemon) => {
       const detailResponse = await axios.get<PokeApiPokemonDetail>(pokemon.url);
       return {
         name: pokemon.name,
         image: detailResponse.data.sprites.front_default || null,
+        types: detailResponse.data.types.map((t) => t.type.name),
       } as Pokemon;
     });
 

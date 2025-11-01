@@ -1,6 +1,7 @@
 export interface Pokemon {
   name: string
   image: string | null
+  types?: string[]
 }
 
 export interface PokemonDetail {
