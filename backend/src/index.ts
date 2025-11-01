@@ -37,6 +37,32 @@ app.get('/api/pokemon', async (req: Request, res: Response) => {
   }
 });
 
+// Get detailed Pokémon information by name
+app.get('/api/pokemon/:name', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
+    
+    const pokemonData = {
+      name: response.data.name,
+      image: response.data.sprites.front_default || null,
+      types: response.data.types.map((t: any) => t.type.name),
+      height: response.data.height,
+      weight: response.data.weight,
+      abilities: response.data.abilities.map((a: any) => a.ability.name),
+    };
+
+    res.json(pokemonData);
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      res.status(404).json({ error: 'Pokémon not found' });
+    } else {
+      console.error('Error fetching Pokémon details:', error);
+      res.status(500).json({ error: 'Failed to fetch Pokémon details' });
+    }
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
