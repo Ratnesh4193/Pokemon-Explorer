@@ -17,8 +17,12 @@ app.get('/ping', (req: Request, res: Response) => {
 // Get list of Pokémon
 app.get('/api/pokemon', async (req: Request, res: Response) => {
   try {
-    const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=20');
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    
+    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
     const pokemonList = response.data.results;
+    const hasMore = response.data.next !== null;
 
     // Fetch detailed info for each Pokémon to get images
     const pokemonPromises = pokemonList.map(async (pokemon: any) => {
@@ -30,7 +34,12 @@ app.get('/api/pokemon', async (req: Request, res: Response) => {
     });
 
     const pokemonWithImages = await Promise.all(pokemonPromises);
-    res.json(pokemonWithImages);
+    res.json({
+      results: pokemonWithImages,
+      hasMore,
+      offset,
+      limit,
+    });
   } catch (error) {
     console.error('Error fetching Pokémon list:', error);
     res.status(500).json({ error: 'Failed to fetch Pokémon list' });

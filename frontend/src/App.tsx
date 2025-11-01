@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 interface Pokemon {
   name: string
@@ -14,32 +14,70 @@ interface PokemonDetail {
   abilities: string[]
 }
 
+interface PokemonResponse {
+  results: Pokemon[]
+  hasMore: boolean
+  offset: number
+  limit: number
+}
+
+// Loading skeleton component
+const PokemonSkeleton = () => (
+  <div className="bg-white rounded-lg p-4 shadow-md animate-pulse">
+    <div className="w-32 h-32 bg-gray-300 rounded mx-auto mb-3"></div>
+    <div className="h-6 bg-gray-300 rounded w-24 mx-auto"></div>
+  </div>
+)
+
 function App() {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
   const [pokemonDetail, setPokemonDetail] = useState<PokemonDetail | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [detailError, setDetailError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [hasMore, setHasMore] = useState(false)
+  const [currentOffset, setCurrentOffset] = useState(0)
+  const limit = 20
 
-  const fetchPokemon = async () => {
-    setLoading(true)
-    setError(null)
+  const fetchPokemon = async (offset = 0, append = false) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+      setError(null)
+    }
+    
     try {
-      const response = await fetch('/api/pokemon')
+      const response = await fetch(`/api/pokemon?limit=${limit}&offset=${offset}`)
       if (!response.ok) {
         throw new Error('Failed to fetch Pokémon')
       }
-      const data = await response.json()
-      console.log('Pokémon data:', data)
-      setPokemonList(data)
+      const data: PokemonResponse = await response.json()
+      
+      if (append) {
+        setPokemonList(prev => [...prev, ...data.results])
+      } else {
+        setPokemonList(data.results)
+      }
+      setHasMore(data.hasMore)
+      setCurrentOffset(offset + data.results.length)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(errorMessage)
       console.error('Error fetching Pokémon:', err)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
+    }
+  }
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchPokemon(currentOffset, true)
     }
   }
 
@@ -47,6 +85,17 @@ function App() {
     // Auto-fetch on mount
     fetchPokemon()
   }, [])
+
+  // Filter Pokémon based on search query
+  const filteredPokemon = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return pokemonList
+    }
+    const query = searchQuery.toLowerCase().trim()
+    return pokemonList.filter(pokemon => 
+      pokemon.name.toLowerCase().includes(query)
+    )
+  }, [pokemonList, searchQuery])
 
   const handlePokemonClick = async (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
@@ -81,25 +130,60 @@ function App() {
       <h1 className="text-center text-4xl font-bold mb-8 text-gray-800">Pokemon Explorer</h1>
 
       {error && (
-        <div className="text-center text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+        <div className="text-center text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200 max-w-2xl mx-auto">
           <strong>Error:</strong> {error}
         </div>
       )}
 
-      {loading && (
-        <div className="text-center mb-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Loading Pokémon...</p>
+      {!selectedPokemon && (
+        <div className="max-w-2xl mx-auto mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search Pokémon by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-gray-600">
+              Showing {filteredPokemon.length} of {pokemonList.length} Pokémon
+            </p>
+          )}
         </div>
       )}
 
-      {!selectedPokemon && pokemonList.length > 0 && (
+      {loading && (
+        <div className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <PokemonSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!selectedPokemon && !loading && filteredPokemon.length > 0 && (
         <div>
           <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700">
-            Found {pokemonList.length} Pokémon
+            {searchQuery ? `Found ${filteredPokemon.length} Pokémon` : `Found ${pokemonList.length} Pokémon`}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
-            {pokemonList.map((pokemon) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto mb-8">
+            {filteredPokemon.map((pokemon) => (
               <div
                 key={pokemon.name}
                 onClick={() => handlePokemonClick(pokemon)}
@@ -118,6 +202,38 @@ function App() {
               </div>
             ))}
           </div>
+
+          {loadingMore && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto mb-8">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <PokemonSkeleton key={`loading-${i}`} />
+              ))}
+            </div>
+          )}
+
+          {!searchQuery && hasMore && (
+            <div className="text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? 'Loading...' : 'Load More Pokémon'}
+              </button>
+            </div>
+          )}
+
+          {!searchQuery && !hasMore && pokemonList.length > 0 && (
+            <div className="text-center text-gray-600">
+              <p>No more Pokémon to load</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!selectedPokemon && !loading && filteredPokemon.length === 0 && pokemonList.length > 0 && (
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No Pokémon found matching "{searchQuery}"</p>
         </div>
       )}
 
@@ -137,9 +253,16 @@ function App() {
           )}
 
           {detailLoading && (
-            <div className="text-center mb-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600">Loading details...</p>
+            <div className="bg-white rounded-lg p-8 shadow-lg">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-300 rounded w-48 mx-auto mb-6"></div>
+                <div className="w-48 h-48 bg-gray-300 rounded mx-auto mb-6"></div>
+                <div className="space-y-4 mt-6">
+                  <div className="h-6 bg-gray-300 rounded w-full"></div>
+                  <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -200,7 +323,7 @@ function App() {
         <div className="text-center">
           <p className="text-gray-600 mb-4">No Pokémon loaded. Click the button to fetch them.</p>
           <button
-            onClick={fetchPokemon}
+            onClick={() => fetchPokemon()}
             disabled={loading}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
