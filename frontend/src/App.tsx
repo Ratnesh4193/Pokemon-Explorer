@@ -77,68 +77,42 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '2rem', minHeight: '100vh', background: '#f5f5f5' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Pokemon Explorer</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-center text-4xl font-bold mb-8 text-gray-800">Pokemon Explorer</h1>
 
       {error && (
-        <div style={{ textAlign: 'center', color: 'red', marginBottom: '1rem' }}>
-          Error: {error}
+        <div className="text-center text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+          <strong>Error:</strong> {error}
         </div>
       )}
 
       {loading && (
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>Loading...</div>
+        <div className="text-center mb-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Loading Pokémon...</p>
+        </div>
       )}
 
       {!selectedPokemon && pokemonList.length > 0 && (
         <div>
-          <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700">
             Found {pokemonList.length} Pokémon
           </h2>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: '1.5rem',
-              maxWidth: '1200px',
-              margin: '0 auto',
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
             {pokemonList.map((pokemon) => (
               <div
                 key={pokemon.name}
                 onClick={() => handlePokemonClick(pokemon)}
-                style={{
-                  background: 'white',
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  textAlign: 'center',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)'
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
-                }}
+                className="bg-white rounded-lg p-4 cursor-pointer shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-center"
               >
                 {pokemon.image && (
                   <img
                     src={pokemon.image}
                     alt={pokemon.name}
-                    style={{
-                      width: '120px',
-                      height: '120px',
-                      objectFit: 'contain',
-                      marginBottom: '0.5rem',
-                    }}
+                    className="w-32 h-32 object-contain mx-auto mb-3"
                   />
                 )}
-                <h3 style={{ textTransform: 'capitalize', fontSize: '1.1rem' }}>
+                <h3 className="text-lg font-semibold capitalize text-gray-800">
                   {pokemon.name}
                 </h3>
               </div>
@@ -148,82 +122,73 @@ function App() {
       )}
 
       {selectedPokemon && (
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <div className="max-w-2xl mx-auto">
           <button
             onClick={handleBackClick}
-            style={{
-              marginBottom: '1rem',
-              padding: '0.5rem 1rem',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              background: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-            }}
+            className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
           >
             ← Back to List
           </button>
 
           {detailError && (
-            <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
-              Error: {detailError}
+            <div className="text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200 text-center">
+              <strong>Error:</strong> {detailError}
             </div>
           )}
 
           {detailLoading && (
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>Loading details...</div>
+            <div className="text-center mb-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Loading details...</p>
+            </div>
           )}
 
           {pokemonDetail && (
-            <div
-              style={{
-                background: 'white',
-                borderRadius: '8px',
-                padding: '2rem',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                textAlign: 'center',
-              }}
-            >
-              <h2 style={{ textTransform: 'capitalize', fontSize: '2rem', marginBottom: '1rem' }}>
+            <div className="bg-white rounded-lg p-8 shadow-lg">
+              <h2 className="text-4xl font-bold capitalize mb-6 text-center text-gray-800">
                 {pokemonDetail.name}
               </h2>
               {pokemonDetail.image && (
                 <img
                   src={pokemonDetail.image}
                   alt={pokemonDetail.name}
-                  style={{
-                    width: '200px',
-                    height: '200px',
-                    objectFit: 'contain',
-                    marginBottom: '1.5rem',
-                  }}
+                  className="w-48 h-48 object-contain mx-auto mb-6"
                 />
               )}
-              <div style={{ textAlign: 'left', marginTop: '1.5rem' }}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <strong>Types:</strong>{' '}
-                  {pokemonDetail.types.map((type, index) => (
-                    <span key={type}>
-                      <span style={{ textTransform: 'capitalize' }}>{type}</span>
-                      {index < pokemonDetail.types.length - 1 && ', '}
-                    </span>
-                  ))}
+              <div className="space-y-4 mt-6">
+                <div className="flex items-center gap-2">
+                  <strong className="text-gray-700 min-w-[100px]">Types:</strong>
+                  <div className="flex gap-2 flex-wrap">
+                    {pokemonDetail.types.map((type) => (
+                      <span
+                        key={type}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium capitalize"
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <strong>Height:</strong> {pokemonDetail.height / 10}m
+                <div className="flex items-center gap-2">
+                  <strong className="text-gray-700 min-w-[100px]">Height:</strong>
+                  <span className="text-gray-600">{(pokemonDetail.height / 10).toFixed(1)}m</span>
                 </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <strong>Weight:</strong> {pokemonDetail.weight / 10}kg
+                <div className="flex items-center gap-2">
+                  <strong className="text-gray-700 min-w-[100px]">Weight:</strong>
+                  <span className="text-gray-600">{(pokemonDetail.weight / 10).toFixed(1)}kg</span>
                 </div>
-                <div>
-                  <strong>Abilities:</strong>{' '}
-                  {pokemonDetail.abilities.map((ability, index) => (
-                    <span key={ability}>
-                      <span style={{ textTransform: 'capitalize' }}>{ability}</span>
-                      {index < pokemonDetail.abilities.length - 1 && ', '}
-                    </span>
-                  ))}
+                <div className="flex items-start gap-2">
+                  <strong className="text-gray-700 min-w-[100px]">Abilities:</strong>
+                  <div className="flex gap-2 flex-wrap">
+                    {pokemonDetail.abilities.map((ability) => (
+                      <span
+                        key={ability}
+                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium capitalize"
+                      >
+                        {ability}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -232,17 +197,12 @@ function App() {
       )}
 
       {pokemonList.length === 0 && !loading && !error && !selectedPokemon && (
-        <div style={{ textAlign: 'center' }}>
-          <p>No Pokémon loaded. Click the button to fetch them.</p>
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No Pokémon loaded. Click the button to fetch them.</p>
           <button
             onClick={fetchPokemon}
             disabled={loading}
-            style={{
-              marginTop: '1rem',
-              padding: '0.5rem 1rem',
-              fontSize: '1rem',
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Loading...' : 'Fetch Pokémon'}
           </button>
@@ -253,4 +213,3 @@ function App() {
 }
 
 export default App
-
