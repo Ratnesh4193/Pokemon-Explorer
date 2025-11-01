@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { usePokemon } from './hooks/usePokemon'
 import { usePokemonDetail } from './hooks/usePokemonDetail'
 import { filterPokemonByName, filterPokemonByTypes } from './utils/pokemon.utils'
@@ -7,12 +7,14 @@ import { FilterBar } from './components/FilterBar'
 import { PokemonList } from './components/PokemonList'
 import { PokemonDetail } from './components/PokemonDetail'
 import { LoadMoreButton } from './components/LoadMoreButton'
-import { ThemeToggle } from './components/ThemeToggle'
+
+const MIN_VISIBLE_RESULTS = 20
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const { pokemonList, loading, loadingMore, error, hasMore, loadMore, refetch } = usePokemon()
+  const prevSearchQueryRef = useRef('')
+  const { pokemonList, loading, loadingMore, error, hasMore, loadMore, refetch, resetApiCallCount, canLoadMore } = usePokemon()
   const {
     selectedPokemon,
     pokemonDetail,
@@ -32,6 +34,29 @@ function App() {
     return filtered
   }, [pokemonList, searchQuery, selectedTypes])
 
+  // Reset API call count when search query changes (new keystroke)
+  useEffect(() => {
+    if (searchQuery !== prevSearchQueryRef.current) {
+      resetApiCallCount()
+      prevSearchQueryRef.current = searchQuery
+    }
+  }, [searchQuery, resetApiCallCount])
+
+  // Auto-load more if filtered results are too few
+  useEffect(() => {
+    const shouldAutoLoad = 
+      !loading && 
+      !loadingMore && 
+      (searchQuery.trim() || selectedTypes.length > 0) && // Has active filters
+      filteredPokemon.length < MIN_VISIBLE_RESULTS && // Less than 20 visible
+      hasMore && // More available
+      canLoadMore // Haven't exceeded API call limit
+
+    if (shouldAutoLoad) {
+      loadMore()
+    }
+  }, [filteredPokemon.length, searchQuery, selectedTypes, hasMore, canLoadMore, loading, loadingMore, loadMore])
+
   const handleTypeToggle = (type: string) => {
     setSelectedTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
@@ -44,12 +69,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8 transition-colors duration-200">
-      <ThemeToggle />
-      <h1 className="text-center text-4xl font-bold mb-8 text-gray-800 dark:text-gray-100">Pokemon Explorer</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <h1 className="text-center text-4xl font-bold mb-8 text-gray-800">Pokemon Explorer</h1>
 
       {error && (
-        <div className="text-center text-red-600 dark:text-red-400 mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 max-w-2xl mx-auto">
+        <div className="text-center text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200 max-w-2xl mx-auto">
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -76,7 +100,7 @@ function App() {
       {!selectedPokemon && (
         <>
           {filteredPokemon.length > 0 && (
-            <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
+            <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700">
               {searchQuery || selectedTypes.length > 0
                 ? `Found ${filteredPokemon.length} Pokémon`
                 : `Found ${pokemonList.length} Pokémon`}
@@ -94,14 +118,21 @@ function App() {
             <LoadMoreButton
               onLoadMore={loadMore}
               isLoading={loadingMore}
-              hasMore={hasMore}
+              hasMore={canLoadMore}
               showNoMore={pokemonList.length > 0}
             />
           )}
 
+          {/* Show auto-loading status for filtered results */}
+          {(searchQuery || selectedTypes.length > 0) && loadingMore && filteredPokemon.length < MIN_VISIBLE_RESULTS && (
+            <div className="text-center text-gray-600 mb-4">
+              <p>Loading more Pokémon to find matches...</p>
+            </div>
+          )}
+
           {!loading && filteredPokemon.length === 0 && pokemonList.length > 0 && (
             <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-gray-600 mb-4">
                 {searchQuery || selectedTypes.length > 0
                   ? `No Pokémon found matching your filters${searchQuery ? ` "${searchQuery}"` : ''}${selectedTypes.length > 0 ? ` and type${selectedTypes.length > 1 ? 's' : ''}: ${selectedTypes.join(', ')}` : ''}`
                   : 'No Pokémon found'}
@@ -109,7 +140,7 @@ function App() {
               {(searchQuery || selectedTypes.length > 0) && (
                 <button
                   onClick={handleClearFilters}
-                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 font-medium"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
                 >
                   Clear Filters
                 </button>
@@ -130,11 +161,11 @@ function App() {
 
       {pokemonList.length === 0 && !loading && !error && !selectedPokemon && (
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No Pokémon loaded. Click the button to fetch them.</p>
+          <p className="text-gray-600 mb-4">No Pokémon loaded. Click the button to fetch them.</p>
           <button
             onClick={refetch}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Loading...' : 'Fetch Pokémon'}
           </button>

@@ -12,34 +12,34 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
     <div className="max-w-4xl mx-auto">
       <button
         onClick={onBack}
-        className="mb-4 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 font-medium"
+        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
       >
         ← Back to List
       </button>
 
       {error && (
-        <div className="text-red-600 dark:text-red-400 mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 text-center">
+        <div className="text-red-600 mb-4 p-4 bg-red-50 rounded-lg border border-red-200 text-center">
           <strong>Error:</strong> {error}
         </div>
       )}
 
       {isLoading && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white rounded-lg p-8 shadow-lg border border-gray-200">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-48 mx-auto mb-6"></div>
-            <div className="w-48 h-48 bg-gray-300 dark:bg-gray-700 rounded mx-auto mb-6"></div>
+            <div className="h-8 bg-gray-300 rounded w-48 mx-auto mb-6"></div>
+            <div className="w-48 h-48 bg-gray-300 rounded mx-auto mb-6"></div>
             <div className="space-y-4 mt-6">
-              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+              <div className="h-6 bg-gray-300 rounded w-full"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+              <div className="h-6 bg-gray-300 rounded w-1/2"></div>
             </div>
           </div>
         </div>
       )}
 
       {pokemon && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-4xl font-bold capitalize mb-6 text-center text-gray-800 dark:text-gray-100">
+        <div className="bg-white rounded-lg p-8 shadow-lg border border-gray-200">
+          <h2 className="text-4xl font-bold capitalize mb-6 text-center text-gray-800">
             {pokemon.name}
           </h2>
           {pokemon.image && (
@@ -51,12 +51,12 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
           )}
           <div className="space-y-6 mt-6">
             <div className="flex items-center gap-2">
-              <strong className="text-gray-700 dark:text-gray-300 min-w-[100px]">Types:</strong>
+              <strong className="text-gray-700 min-w-[100px]">Types:</strong>
               <div className="flex gap-2 flex-wrap">
                 {pokemon.types.map((type) => (
                   <span
                     key={type}
-                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium capitalize"
+                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium capitalize"
                   >
                     {type}
                   </span>
@@ -64,23 +64,23 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <strong className="text-gray-700 dark:text-gray-300 min-w-[100px]">Height:</strong>
-              <span className="text-gray-600 dark:text-gray-400">{(pokemon.height / 10).toFixed(1)}m</span>
+              <strong className="text-gray-700 min-w-[100px]">Height:</strong>
+              <span className="text-gray-600">{(pokemon.height / 10).toFixed(1)}m</span>
             </div>
             <div className="flex items-center gap-2">
-              <strong className="text-gray-700 dark:text-gray-300 min-w-[100px]">Weight:</strong>
-              <span className="text-gray-600 dark:text-gray-400">{(pokemon.weight / 10).toFixed(1)}kg</span>
+              <strong className="text-gray-700 min-w-[100px]">Weight:</strong>
+              <span className="text-gray-600">{(pokemon.weight / 10).toFixed(1)}kg</span>
             </div>
             <div>
-              <strong className="text-gray-700 dark:text-gray-300 block mb-2">Abilities:</strong>
+              <strong className="text-gray-700 block mb-2">Abilities:</strong>
               <div className="flex gap-2 flex-wrap">
                 {pokemon.abilities.map((ability) => (
                   <span
                     key={ability.name}
                     className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${
                       ability.isHidden
-                        ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                        : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-green-100 text-green-800'
                     }`}
                   >
                     {ability.name}
@@ -95,7 +95,7 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
             {/* Evolution Chain */}
             {pokemon.evolutionChain && pokemon.evolutionChain.length > 1 && (
               <div>
-                <strong className="text-gray-700 dark:text-gray-300 block mb-3 text-lg">
+                <strong className="text-gray-700 block mb-3 text-lg">
                   Evolution Chain:
                 </strong>
                 <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -104,8 +104,8 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
                       <div
                         className={`text-center p-3 rounded-lg ${
                           evolution.name.toLowerCase() === pokemon.name.toLowerCase()
-                            ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-400'
-                            : 'bg-gray-100 dark:bg-gray-700'
+                            ? 'bg-blue-100 border-2 border-blue-500'
+                            : 'bg-gray-100'
                         }`}
                       >
                         {evolution.image ? (
@@ -115,16 +115,16 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
                             className="w-24 h-24 object-contain mx-auto mb-2"
                           />
                         ) : (
-                          <div className="w-24 h-24 bg-gray-300 dark:bg-gray-600 rounded mx-auto mb-2 flex items-center justify-center">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">No image</span>
+                          <div className="w-24 h-24 bg-gray-300 rounded mx-auto mb-2 flex items-center justify-center">
+                            <span className="text-xs text-gray-500">No image</span>
                           </div>
                         )}
-                        <p className="text-sm font-semibold capitalize text-gray-800 dark:text-gray-200">
+                        <p className="text-sm font-semibold capitalize text-gray-800">
                           {evolution.name}
                         </p>
                       </div>
                       {index < pokemon.evolutionChain.length - 1 && (
-                        <div className="text-2xl text-gray-400 dark:text-gray-500 mx-2">→</div>
+                        <div className="text-2xl text-gray-400 mx-2">→</div>
                       )}
                     </div>
                   ))}
@@ -135,21 +135,21 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
             {/* Moves */}
             {pokemon.moves && pokemon.moves.length > 0 && (
               <div>
-                <strong className="text-gray-700 dark:text-gray-300 block mb-3 text-lg">
+                <strong className="text-gray-700 block mb-3 text-lg">
                   Moves:
                 </strong>
-                <div className="max-h-96 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                <div className="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {pokemon.moves.map((move, index) => (
                       <div
                         key={`${move.name}-${index}`}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700"
+                        className="flex items-center justify-between p-2 bg-white rounded border border-gray-200"
                       >
-                        <span className="text-sm font-medium capitalize text-gray-800 dark:text-gray-200">
+                        <span className="text-sm font-medium capitalize text-gray-800">
                           {move.name.replace(/-/g, ' ')}
                         </span>
                         {move.level !== undefined && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                          <span className="text-xs text-gray-500 ml-2">
                             Lv.{move.level}
                           </span>
                         )}
@@ -157,7 +157,7 @@ export const PokemonDetail = ({ pokemon, isLoading, error, onBack }: PokemonDeta
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   Showing {pokemon.moves.length} move{pokemon.moves.length !== 1 ? 's' : ''}
                   {pokemon.moves[0]?.level !== undefined && ' (Level-up moves)'}
                 </p>
