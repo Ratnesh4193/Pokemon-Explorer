@@ -14,6 +14,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const prevSearchQueryRef = useRef('')
+  const prevSelectedTypesRef = useRef<string[]>([])
   const { pokemonList, loading, loadingMore, error, hasMore, loadMore, refetch, resetApiCallCount, canLoadMore } = usePokemon()
   const {
     selectedPokemon,
@@ -34,13 +35,17 @@ function App() {
     return filtered
   }, [pokemonList, searchQuery, selectedTypes])
 
-  // Reset API call count when search query changes (new keystroke)
+  // Reset API call count when search query or type filters change (new user action)
   useEffect(() => {
-    if (searchQuery !== prevSearchQueryRef.current) {
+    const searchChanged = searchQuery !== prevSearchQueryRef.current
+    const typesChanged = JSON.stringify(selectedTypes) !== JSON.stringify(prevSelectedTypesRef.current)
+    
+    if (searchChanged || typesChanged) {
       resetApiCallCount()
       prevSearchQueryRef.current = searchQuery
+      prevSelectedTypesRef.current = selectedTypes
     }
-  }, [searchQuery, resetApiCallCount])
+  }, [searchQuery, selectedTypes, resetApiCallCount])
 
   // Auto-load more if filtered results are too few
   useEffect(() => {
