@@ -12,3 +12,8 @@ app.use(express.json());
 // Routes
 app.use('/ping', healthRoutes);
 app.use('/api/pokemon', pokemonRoutes);
+
+const PORT=process.env.PORT || 5001
+app.listen(PORT,()=>{
+    console.log(`server running at ${PORT}`)
+})
