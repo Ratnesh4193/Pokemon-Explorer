@@ -11,10 +11,27 @@ A full-stack web application for exploring Pokémon data from the PokéAPI. Buil
 
 ## 🏗️ Architecture
 
-The project is split into two main parts:
+The project follows a modern monorepo structure:
 
-- **Backend** (`/backend`): Express.js API server that acts as a proxy to PokéAPI
+- **Backend** (root-level `src/`): Express.js API server that acts as a proxy to PokéAPI
 - **Frontend** (`/frontend`): React + TypeScript application built with Vite
+- **Deployment**: Configured with Vercel (`vercel.json`) for seamless deployments
+
+### Project Structure
+
+```
+Pokemon-Explorer/
+├── src/                    # Backend source code (Express.js API)
+│   └── index.ts           # Main server file
+├── frontend/              # React frontend application
+│   ├── src/
+│   ├── public/
+│   └── vite.config.ts
+├── package.json           # Root-level dependencies (backend)
+├── tsconfig.json          # TypeScript configuration
+├── vercel.json            # Vercel deployment configuration
+└── README.md
+```
 
 ### Tech Stack
 
@@ -23,6 +40,7 @@ The project is split into two main parts:
 - TypeScript
 - Axios (for API calls)
 - CORS enabled
+- Runs on port 5001
 
 **Frontend:**
 - React 18
@@ -39,28 +57,17 @@ The project is split into two main parts:
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
+1. Install dependencies in the root directory:
    ```bash
    npm install
    ```
 
-3. Start the development server:
+2. Start the backend development server:
    ```bash
    npm run dev
    ```
-
-   The backend server will run on `http://localhost:3001`
-
-4. (Optional) Build for production:
-   ```bash
-   npm run build
-   npm start
-   ```
+   
+   The backend server will start on **port 5001**.
 
 ### Frontend Setup
 
@@ -69,148 +76,82 @@ The project is split into two main parts:
    cd frontend
    ```
 
-2. Install dependencies:
+2. Install frontend dependencies:
    ```bash
    npm install
    ```
 
-3. Start the development server:
+3. Start the frontend development server:
    ```bash
    npm run dev
    ```
-
-   The frontend will run on `http://localhost:3000`
+   
+   The frontend will start on **port 3000** (default). Configure in `vite.config.ts` if needed.
 
 ## 🚀 Running the Application
 
-1. **Start the backend server** (in `backend/` directory):
+1. **Start Backend** (from root):
    ```bash
    npm run dev
    ```
 
-2. **Start the frontend server** (in `frontend/` directory, in a new terminal):
+2. **Start Frontend** (in a new terminal):
    ```bash
+   cd frontend
    npm run dev
    ```
 
 3. Open your browser and navigate to `http://localhost:3000`
 
-4. The app will automatically fetch and display the first 20 Pokémon
+## 🌐 API Endpoints
 
-5. Click on any Pokémon card to view detailed information
+### Backend (Port 5001)
 
-6. Use the "Back to List" button to return to the list view
-
-## 📡 API Endpoints
-
-### Backend API
-
-- `GET /ping` - Health check endpoint
-- `GET /api/pokemon` - Get list of first 20 Pokémon (name + image)
-- `GET /api/pokemon/:name` - Get detailed information for a specific Pokémon
-
-### Example Responses
-
-**GET /api/pokemon:**
-```json
-[
-  {
-    "name": "bulbasaur",
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
-  },
-  ...
-]
-```
-
-**GET /api/pokemon/bulbasaur:**
-```json
-{
-  "name": "bulbasaur",
-  "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
-  "types": ["grass", "poison"],
-  "height": 7,
-  "weight": 69,
-  "abilities": ["overgrow", "chlorophyll"]
-}
-```
-
-## 🧪 Testing
-
-### Integration Testing (Phase 9)
-
-To validate the end-to-end integration:
-
-1. Ensure both backend and frontend servers are running
-2. Open the app in your browser (`http://localhost:3000`)
-3. Verify the following:
-   - ✅ List view loads and displays 20 Pokémon with images
-   - ✅ Clicking a Pokémon card navigates to detail view
-   - ✅ Detail view shows all information (types, height, weight, abilities)
-   - ✅ "Back to List" button returns to list view
-   - ✅ No console errors in browser DevTools
-   - ✅ No CORS errors
-   - ✅ All images load correctly
-   - ✅ Loading states display correctly
-   - ✅ Error handling works (test by stopping backend server)
-
-## 📁 Project Structure
-
-```
-pokemon-explorer/
-├── backend/
-│   ├── src/
-│   │   └── index.ts          # Express server and API routes
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── README.md
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx           # Main React component
-│   │   ├── main.tsx          # React entry point
-│   │   └── index.css         # Global styles with Tailwind
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   ├── tailwind.config.js
-│   └── postcss.config.js
-├── .gitignore
-└── README.md
-```
-
-## 🔧 Configuration
-
-### Backend Port
-
-Default port is `3001`. Override with `PORT` environment variable:
-```bash
-PORT=4000 npm run dev
-```
-
-### Frontend Port
-
-Default port is `3000`. Configure in `vite.config.ts` if needed.
+- `GET /api/pokemon` - Fetches a list of Pokémon
+- `GET /api/pokemon/:name` - Fetches details for a specific Pokémon
 
 ### API Proxy
 
 The frontend uses Vite's proxy to forward `/api` requests to the backend. Configure in `frontend/vite.config.ts`.
 
+## 📁 Recent Structure Changes
+
+The project was recently restructured for better organization and deployment:
+
+- ✅ Backend code moved from `/backend` to root-level `src/` directory
+- ✅ `package.json` and dependencies moved to root level
+- ✅ Backend port changed from **3001** to **5001**
+- ✅ Added `vercel.json` for deployment configuration
+- ✅ Simplified project structure for monorepo approach
+
+## 🚢 Deployment
+
+The application is configured for deployment on Vercel:
+
+- Backend is deployed as serverless functions
+- Frontend is built and served as static files
+- Configuration is managed through `vercel.json`
+
 ## 🐛 Troubleshooting
 
 ### Backend issues
+
 - Ensure Node.js is installed: `node --version`
-- Check if port 3001 is available
-- Verify all dependencies are installed: `npm install`
+- Check if port 5001 is available
+- Verify all dependencies are installed: `npm install` (in root)
 
 ### Frontend issues
+
 - Ensure backend is running before starting frontend
 - Check browser console for errors
 - Verify CORS is enabled in backend
 - Clear browser cache if needed
 
 ### CORS errors
+
 - Ensure backend CORS middleware is configured (already set up)
-- Check that backend is running on the correct port
+- Check that backend is running on port 5001
+- Verify proxy configuration in `frontend/vite.config.ts`
 
 ## 📝 Development Notes
 
@@ -235,8 +176,9 @@ ISC
 ## 👤 Author
 
 Built as a full-stack development project demonstrating:
+
 - Frontend-backend integration
 - API proxying and data transformation
 - Modern React patterns with TypeScript
 - Responsive UI design
-
+- Monorepo structure and deployment configuration
