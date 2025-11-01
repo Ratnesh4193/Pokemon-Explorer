@@ -8,6 +8,7 @@ import {
   PokeApiPokemonDetail,
   PokeApiSpecies,
   PokeApiEvolutionChain,
+  PokeApiEvolutionChainLink,
   EvolutionChain,
   Move,
   Ability,
