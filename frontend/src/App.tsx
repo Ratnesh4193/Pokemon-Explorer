@@ -5,11 +5,23 @@ interface Pokemon {
   image: string | null
 }
 
+interface PokemonDetail {
+  name: string
+  image: string | null
+  types: string[]
+  height: number
+  weight: number
+  abilities: string[]
+}
+
 function App() {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
+  const [pokemonDetail, setPokemonDetail] = useState<PokemonDetail | null>(null)
   const [loading, setLoading] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [detailError, setDetailError] = useState<string | null>(null)
 
   const fetchPokemon = async () => {
     setLoading(true)
@@ -36,8 +48,32 @@ function App() {
     fetchPokemon()
   }, [])
 
-  const handlePokemonClick = (pokemon: Pokemon) => {
+  const handlePokemonClick = async (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
+    setDetailLoading(true)
+    setDetailError(null)
+    setPokemonDetail(null)
+    
+    try {
+      const response = await fetch(`/api/pokemon/${pokemon.name}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch Pokémon details')
+      }
+      const data = await response.json()
+      setPokemonDetail(data)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setDetailError(errorMessage)
+      console.error('Error fetching Pokémon details:', err)
+    } finally {
+      setDetailLoading(false)
+    }
+  }
+
+  const handleBackClick = () => {
+    setSelectedPokemon(null)
+    setPokemonDetail(null)
+    setDetailError(null)
   }
 
   return (
@@ -111,7 +147,91 @@ function App() {
         </div>
       )}
 
-      {pokemonList.length === 0 && !loading && !error && (
+      {selectedPokemon && (
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <button
+            onClick={handleBackClick}
+            style={{
+              marginBottom: '1rem',
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              background: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+            }}
+          >
+            ← Back to List
+          </button>
+
+          {detailError && (
+            <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+              Error: {detailError}
+            </div>
+          )}
+
+          {detailLoading && (
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>Loading details...</div>
+          )}
+
+          {pokemonDetail && (
+            <div
+              style={{
+                background: 'white',
+                borderRadius: '8px',
+                padding: '2rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+              }}
+            >
+              <h2 style={{ textTransform: 'capitalize', fontSize: '2rem', marginBottom: '1rem' }}>
+                {pokemonDetail.name}
+              </h2>
+              {pokemonDetail.image && (
+                <img
+                  src={pokemonDetail.image}
+                  alt={pokemonDetail.name}
+                  style={{
+                    width: '200px',
+                    height: '200px',
+                    objectFit: 'contain',
+                    marginBottom: '1.5rem',
+                  }}
+                />
+              )}
+              <div style={{ textAlign: 'left', marginTop: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <strong>Types:</strong>{' '}
+                  {pokemonDetail.types.map((type, index) => (
+                    <span key={type}>
+                      <span style={{ textTransform: 'capitalize' }}>{type}</span>
+                      {index < pokemonDetail.types.length - 1 && ', '}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <strong>Height:</strong> {pokemonDetail.height / 10}m
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <strong>Weight:</strong> {pokemonDetail.weight / 10}kg
+                </div>
+                <div>
+                  <strong>Abilities:</strong>{' '}
+                  {pokemonDetail.abilities.map((ability, index) => (
+                    <span key={ability}>
+                      <span style={{ textTransform: 'capitalize' }}>{ability}</span>
+                      {index < pokemonDetail.abilities.length - 1 && ', '}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {pokemonList.length === 0 && !loading && !error && !selectedPokemon && (
         <div style={{ textAlign: 'center' }}>
           <p>No Pokémon loaded. Click the button to fetch them.</p>
           <button
